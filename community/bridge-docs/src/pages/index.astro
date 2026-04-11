@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+<BaseLayout title="BridgeAIChat Beta" description="Run one chat UI for AI CLIs across your own devices.">
+  <section class="hero">
+    <div class="card">
+      <div class="eyebrow">Developer Control Plane</div>
+      <h1>One chat interface for the AI tools running on your machines.</h1>
+      <p>
+        BridgeAIChat gives you a WhatsApp-style UI for CLI-native agents and models running on your own laptop,
+        desktop, VPS, or Raspberry Pi. It connects over Tailscale, keeps device context visible, and avoids hosted AI gateways.
+      </p>
+      <div class="cta-row">
+        <a class="button primary" href="/downloads">Get the beta</a>
+        <a class="button" href="/docs/quickstart">Read the quickstart</a>
+      </div>
+    </div>
+    <div class="card">
+      <h2>What ships in beta</h2>
+      <ul>
+        <li>Gateway-hosted web UI</li>
+        <li>Standalone bridge-agent binaries</li>
+        <li>Codex-first testing path</li>
+        <li>Claude support with local quota/auth caveats</li>
+        <li>GitHub Releases for all downloads</li>
+      </ul>
+      <pre>BridgeAIChat UI
+  → Gateway
+    → Tailscale
+      → bridge-agent
+        → local AI CLI</pre>
+    </div>
+  </section>
+
+  <section class="section grid three">
+    <div class="card">
+      <h2>Own the runtime</h2>
+      <p>No hosted model control plane. Devices run their own CLIs, tools, and context.</p>
+    </div>
+    <div class="card">
+      <h2>Multi-device by design</h2>
+      <p>Each machine becomes a thread, so your laptop, VPS, and Pi stay visible and separate.</p>
+    </div>
+    <div class="card">
+      <h2>Beta-first distribution</h2>
+      <p>Start from GitHub Releases, test on your own fleet, and iterate before package-manager polish.</p>
+    </div>
+  </section>
+</BaseLayout>

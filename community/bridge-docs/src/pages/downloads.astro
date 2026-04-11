@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+<BaseLayout title="BridgeAIChat Downloads">
+  <section class="card">
+    <div class="eyebrow">Downloads</div>
+    <h1>GitHub Releases</h1>
+    <p>All first-beta downloads come from GitHub Releases only.</p>
+    <div class="grid two">
+      <div>
+        <h2>bridge-app</h2>
+        <p><a href="https://github.com/bridge-ai-chat/bridge-app/releases">GitHub Releases</a></p>
+      </div>
+      <div>
+        <h2>bridge-agent</h2>
+        <p><a href="https://github.com/bridge-ai-chat/bridge-agent/releases">GitHub Releases</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>Compatibility Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>App</th>
+          <th>Agent</th>
+          <th>Tested setups</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>v0.1.0-beta.1</td>
+          <td>v0.1.0-beta.1</td>
+          <td>macOS host + macOS agent, Linux VPS agent, Raspberry Pi/Linux ARM agent</td>
+          <td>Codex-first happy path</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</BaseLayout>
