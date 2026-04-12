@@ -36,3 +36,7 @@ agent/agent.yaml
 
 # Logs
 *.log
+
+# Local verification caches
+.gocache/
+.gopath/

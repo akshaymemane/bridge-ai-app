@@ -1,13 +1,57 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 ---
-<BaseLayout title="Install BridgeAIChat Agent">
-  <section class="card">
+<BaseLayout title="Install BridgeAIChat Agent" description="Install and configure a BridgeAIChat agent on a remote device.">
+  <section class="surface">
     <div class="eyebrow">Install</div>
-    <h1>Agent devices</h1>
-    <p>Pick the release archive that matches your device architecture, then configure the gateway URL over Tailscale.</p>
-    <pre>chmod +x ./bridge-agent
-cp agent.yaml.example agent.yaml
-./bridge-agent -config ./agent.yaml</pre>
+    <h1>Turn a machine into a BridgeAIChat agent.</h1>
+    <p class="lede">
+      Each agent device keeps its own AI CLI, working directory, and runtime context. The installer handles the local
+      config file, gateway URL prompt, and optional startup-service registration.
+    </p>
+  </section>
+
+  <section class="section-gap grid two">
+    <div class="card stack">
+      <div class="eyebrow">Preferred</div>
+      <h2>Install with Homebrew</h2>
+      <pre>brew install bridge-ai-chat/tap/bridge-agent
+bash "$(brew --prefix)/share/bridge-agent/install-agent.sh"</pre>
+      <p>This path installs the binary onto <code>PATH</code> and writes configuration to <code>~/.bridge-agent/agent.yaml</code>.</p>
+    </div>
+
+    <div class="card stack">
+      <div class="eyebrow">Fallback</div>
+      <h2>Use the release archive</h2>
+      <pre>tar -xzf bridge-agent_v0.1.0-beta.1_darwin_arm64.tar.gz
+cd bridge-agent_v0.1.0-beta.1_darwin_arm64
+bash install-agent.sh</pre>
+      <p>The release installer works from the extracted bundle and can still install the agent as a background service.</p>
+    </div>
+  </section>
+
+  <section class="section-gap grid two">
+    <div class="card">
+      <div class="eyebrow">Requirements</div>
+      <h2>What must exist on the device</h2>
+      <ul class="list tight">
+        <li><code>tmux</code> must be installed</li>
+        <li>Tailscale must be able to reach the gateway</li>
+        <li>An AI CLI must already be installed locally</li>
+        <li>The CLI command and args in <code>agent.yaml</code> must match what is actually available on the device</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Example</div>
+      <h2>Minimal gateway block</h2>
+      <pre>device:
+  id: macbook-pro
+  name: Akshay's MacBook Pro
+
+gateway:
+  url: ws://100.101.102.103:8080/agent</pre>
+      <p>Use Tailscale IPs or MagicDNS names instead of public internet routing for the first beta.</p>
+    </div>
   </section>
 </BaseLayout>

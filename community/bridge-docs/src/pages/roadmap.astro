@@ -1,15 +1,37 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 ---
-<BaseLayout title="BridgeAIChat Roadmap">
-  <section class="card">
+<BaseLayout title="BridgeAIChat Roadmap" description="BridgeAIChat beta roadmap and near-term distribution milestones.">
+  <section class="surface">
     <div class="eyebrow">Roadmap</div>
-    <h1>Beta roadmap</h1>
-    <ul>
-      <li>Cleaner installer path for agent devices</li>
-      <li>Per-chat Codex resume</li>
-      <li>Improved CLI failure surfacing</li>
-      <li>Expanded test matrix and release cadence</li>
-    </ul>
+    <h1>What we are tightening after the first public beta.</h1>
+    <p class="lede">
+      The current milestone is community usability: better installs, clearer release flow, and fewer confusing CLI
+      failure modes. The next layer is stronger session handling and broader fleet polish.
+    </p>
+  </section>
+
+  <section class="section-gap grid two">
+    <div class="card">
+      <div class="eyebrow">Near Term</div>
+      <h2>Beta hardening</h2>
+      <ul class="list tight">
+        <li>Finish publishing the Homebrew tap as the default install path</li>
+        <li>Tighten agent-side failure surfacing for auth, quota, and missing tool binaries</li>
+        <li>Expand the tested platform matrix and release cadence</li>
+        <li>Smooth service installation and post-install checks on agent devices</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Runtime</div>
+      <h2>Execution model improvements</h2>
+      <ul class="list tight">
+        <li>Safer per-chat Codex session continuation</li>
+        <li>Clearer multi-device reconnection handling and visibility</li>
+        <li>Better file-transfer and artifact-return workflows</li>
+        <li>More predictable conversation persistence across tool adapters</li>
+      </ul>
+    </div>
   </section>
 </BaseLayout>

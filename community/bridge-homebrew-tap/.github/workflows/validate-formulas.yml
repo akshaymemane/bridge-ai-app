@@ -1,0 +1,17 @@
+name: validate-formulas
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ruby-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Ruby syntax
+        run: |
+          ruby -c Formula/bridge-app.rb
+          ruby -c Formula/bridge-agent.rb

@@ -22,9 +22,21 @@ jobs:
         run: npm ci
       - name: Build app release
         run: bash scripts/package-app-release.sh "${GITHUB_REF_NAME}"
+      - name: Render Homebrew formula
+        run: |
+          bash packaging/homebrew/render-bridge-app-formula.sh \
+            "${GITHUB_REF_NAME}" \
+            "${GITHUB_REPOSITORY}" \
+            "dist/bridge-app_${GITHUB_REF_NAME}/SHA256SUMS.txt" \
+            "dist/bridge-app_${GITHUB_REF_NAME}/bridge-app.rb"
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/bridge-app_${{ github.ref_name }}/*.tar.gz
             dist/bridge-app_${{ github.ref_name }}/SHA256SUMS.txt
+      - name: Upload Homebrew formula artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-app-homebrew-formula
+          path: dist/bridge-app_${{ github.ref_name }}/bridge-app.rb

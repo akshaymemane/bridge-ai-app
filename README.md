@@ -14,6 +14,7 @@ This repository does not represent the final community split by itself. The plan
 - `bridge-app` — gateway + UI + app release packaging
 - `bridge-agent` — remote device runtime and agent releases
 - `bridge-docs` — public website, docs, downloads, and compatibility matrix
+- `bridge-homebrew-tap` — package-manager install entrypoint for `brew install`
 
 Repo seeds for the other two repositories live under [community](/Users/apple/workspace/bridge-ai-chat/community).
 
@@ -37,6 +38,7 @@ App release assets from this repo contain:
 
 - gateway binary
 - built frontend UI
+- `install-app.sh`
 - `run-gateway.sh`
 - release README
 - `SHA256SUMS.txt`
@@ -47,6 +49,7 @@ They do not contain agent binaries.
 
 - Agent repo seed: [community/bridge-agent](/Users/apple/workspace/bridge-ai-chat/community/bridge-agent)
 - Docs repo seed: [community/bridge-docs](/Users/apple/workspace/bridge-ai-chat/community/bridge-docs)
+- Homebrew tap seed: [community/bridge-homebrew-tap](/Users/apple/workspace/bridge-ai-chat/community/bridge-homebrew-tap)
 
 ## References
 

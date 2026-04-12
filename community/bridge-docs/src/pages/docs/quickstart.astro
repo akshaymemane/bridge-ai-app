@@ -1,16 +1,60 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 ---
-<BaseLayout title="BridgeAIChat Quickstart">
-  <section class="card">
+<BaseLayout title="BridgeAIChat Quickstart" description="Get BridgeAIChat running across a control host and one agent device.">
+  <section class="surface">
     <div class="eyebrow">Quickstart</div>
-    <h1>Run the first beta</h1>
-    <p>Use the app release on your control host, then add agent releases to the devices you want to control.</p>
-    <pre>1. Download bridge-app release
-2. Run ./run-gateway.sh
-3. Open http://localhost:8080
-4. Download matching bridge-agent release on another device
-5. Edit agent.yaml
-6. Run ./bridge-agent -config ./agent.yaml</pre>
+    <h1>Bring up the beta in three moves.</h1>
+    <p class="lede">
+      Preferred path on macOS is Homebrew. If you are testing before the tap is public, use the packaged release
+      installers instead. The runtime shape stays the same either way.
+    </p>
+    <div class="status section"><strong>Beta note:</strong> Codex is the smoothest first-run path today. Claude works, but local auth and quota state still matter on the device.</div>
+  </section>
+
+  <section class="section-gap step-list">
+    <div class="step">
+      <div class="step-number">1</div>
+      <p class="mini-title">Install and start the control host</p>
+      <pre>brew install bridge-ai-chat/tap/bridge-app
+bridge-gateway</pre>
+      <p class="muted">Fallback beta path: download the matching <code>bridge-app</code> release and run <code>bash install-app.sh</code>.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <p class="mini-title">Install one agent on another machine</p>
+      <pre>brew install bridge-ai-chat/tap/bridge-agent
+bash "$(brew --prefix)/share/bridge-agent/install-agent.sh"</pre>
+      <p class="muted">The installer creates <code>~/.bridge-agent/agent.yaml</code>, prompts for the gateway URL, and can register the agent as a startup service.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <p class="mini-title">Open the UI and send a test prompt</p>
+      <pre>open http://localhost:8080</pre>
+      <p class="muted">Once the device shows as online, send a simple prompt like <code>hi</code> or <code>what directory are you in?</code> to validate the flow.</p>
+    </div>
+  </section>
+
+  <section class="section-gap grid two">
+    <div class="card">
+      <div class="eyebrow">Gateway URL</div>
+      <h2>What the agent needs</h2>
+      <pre>gateway:
+  url: ws://100.x.x.x:8080/agent</pre>
+      <p>Use the control host's Tailscale IP or MagicDNS name so the remote device can reach the gateway privately.</p>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Requirements</div>
+      <h2>Before you start</h2>
+      <ul class="list tight">
+        <li>Tailscale on the control host and every agent device</li>
+        <li><code>tmux</code> installed on every agent device</li>
+        <li>A supported AI CLI on the agent device, such as Codex or Claude</li>
+        <li>The gateway running before the first agent attempts to connect</li>
+      </ul>
+    </div>
   </section>
 </BaseLayout>

@@ -39,6 +39,14 @@ bash install-agent.sh
 The installer creates \`agent.yaml\`, checks for tmux, and optionally
 sets up bridge-agent as a startup service (launchd on macOS, systemd on Linux).
 
+## Homebrew path
+
+Once a Homebrew tap is published, the intended macOS install flow is:
+
+\`\`\`bash
+brew install bridge-ai-chat/tap/bridge-agent
+\`\`\`
+
 ## Manual Start
 
 \`\`\`bash

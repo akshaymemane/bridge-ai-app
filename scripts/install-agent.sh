@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-agent.sh — set up bridge-agent on this device.
 #
-# Usage (from the extracted release tarball directory):
+# Usage:
 #   bash install-agent.sh
 #
 # What it does:
@@ -10,13 +10,27 @@
 #   3. Verifies tmux is installed.
 #   4. Optionally installs bridge-agent as a startup service
 #      (launchd on macOS, systemd on Linux).
+#
+# This works both from:
+#   - an extracted release directory, where bridge-agent sits beside this script
+#   - a package-manager install, where bridge-agent is on PATH and config lives in ~/.bridge-agent
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENT_BIN="$SCRIPT_DIR/bridge-agent"
-EXAMPLE_YAML="$SCRIPT_DIR/agent.yaml.example"
-AGENT_YAML="$SCRIPT_DIR/agent.yaml"
+DEFAULT_AGENT_HOME="$SCRIPT_DIR"
+
+if [[ -f "$SCRIPT_DIR/bridge-agent" ]]; then
+  DEFAULT_AGENT_BIN="$SCRIPT_DIR/bridge-agent"
+else
+  DEFAULT_AGENT_BIN="$(command -v bridge-agent || true)"
+  DEFAULT_AGENT_HOME="$HOME/.bridge-agent"
+fi
+
+AGENT_HOME="${BRIDGE_AGENT_HOME:-$DEFAULT_AGENT_HOME}"
+AGENT_BIN="${BRIDGE_AGENT_BIN:-$DEFAULT_AGENT_BIN}"
+EXAMPLE_YAML="${BRIDGE_AGENT_EXAMPLE:-$SCRIPT_DIR/agent.yaml.example}"
+AGENT_YAML="${BRIDGE_AGENT_CONFIG:-$AGENT_HOME/agent.yaml}"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -124,13 +138,14 @@ EOF
 info "Starting bridge-agent installer"
 echo
 
-if [[ ! -f "$AGENT_BIN" ]]; then
-  err "bridge-agent binary not found at $AGENT_BIN"
-  err "Make sure you are running this script from the extracted release directory."
+if [[ -z "$AGENT_BIN" || ! -f "$AGENT_BIN" ]]; then
+  err "bridge-agent binary not found."
+  err "Expected either a local ./bridge-agent beside this installer or bridge-agent on PATH."
   exit 1
 fi
 
 chmod +x "$AGENT_BIN"
+mkdir -p "$AGENT_HOME"
 
 # Check tmux.
 if ! command -v tmux &>/dev/null; then

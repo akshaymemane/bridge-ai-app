@@ -28,6 +28,7 @@ build_target() {
   )
 
   cp -R "$ROOT_DIR/frontend/dist" "$stage_dir/ui"
+  cp "$ROOT_DIR/scripts/install-app.sh" "$stage_dir/install-app.sh"
 
   cat > "$stage_dir/run-gateway.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -36,13 +37,20 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 exec "$DIR/bridge-gateway" -ui-dist "$DIR/ui"
 EOF
   chmod +x "$stage_dir/run-gateway.sh"
+  chmod +x "$stage_dir/install-app.sh"
 
   cat > "$stage_dir/README.md" <<EOF
 # bridge-app $VERSION
 
 This release contains the BridgeAIChat gateway and built frontend UI.
 
-## Run
+## Preferred install
+
+\`\`\`bash
+bash install-app.sh
+\`\`\`
+
+## Portable run
 
 \`\`\`bash
 ./run-gateway.sh

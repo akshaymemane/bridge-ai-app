@@ -16,9 +16,21 @@ jobs:
           go-version: '1.21'
       - name: Build agent release
         run: bash scripts/package-agent-release.sh "${GITHUB_REF_NAME}"
+      - name: Render Homebrew formula
+        run: |
+          bash packaging/homebrew/render-bridge-agent-formula.sh \
+            "${GITHUB_REF_NAME}" \
+            "${GITHUB_REPOSITORY}" \
+            "dist/bridge-agent_${GITHUB_REF_NAME}/SHA256SUMS.txt" \
+            "dist/bridge-agent_${GITHUB_REF_NAME}/bridge-agent.rb"
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/bridge-agent_${{ github.ref_name }}/*.tar.gz
             dist/bridge-agent_${{ github.ref_name }}/SHA256SUMS.txt
+      - name: Upload Homebrew formula artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-agent-homebrew-formula
+          path: dist/bridge-agent_${{ github.ref_name }}/bridge-agent.rb
