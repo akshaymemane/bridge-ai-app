@@ -4,6 +4,7 @@ frontend/dist/
 gateway/gateway
 gateway/bridge-gateway
 agent/bridge-agent
+agent/bridge-agent-*
 agent/agent
 community/bridge-agent/bridge-agent
 

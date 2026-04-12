@@ -1,4 +1,4 @@
-bridge-agent
+/bridge-agent
 dist/
 *.exe
 *.out
