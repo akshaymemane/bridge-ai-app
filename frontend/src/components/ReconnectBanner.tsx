@@ -23,7 +23,7 @@ export function ReconnectBanner() {
           <WifiOff size={12} />
           <span>
             Gateway disconnected — attempting to reconnect automatically. Check that the gateway is
-            running on <code className="font-mono-chat text-yellow-300">localhost:8080</code>.
+            running on <code className="font-mono-chat text-yellow-300">{window.location.host}</code>.
           </span>
         </>
       )}

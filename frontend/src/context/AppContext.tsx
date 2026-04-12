@@ -4,7 +4,8 @@ import { useChatState } from '../hooks/useChatState'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { generateChatId, toWsUrl } from '../lib/utils'
 
-const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string | undefined) ?? 'http://localhost:8080'
+const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string | undefined) ??
+  `${window.location.protocol}//${window.location.host}`
 
 interface AppContextValue {
   // Devices
