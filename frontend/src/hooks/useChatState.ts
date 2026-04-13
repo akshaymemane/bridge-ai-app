@@ -15,7 +15,6 @@ type Action =
   | { type: 'SET_DEVICES'; devices: Device[] }
   | { type: 'UPDATE_DEVICE_STATUS'; device_id: string; name?: string; status: 'online' | 'offline' }
   | { type: 'ADD_USER_MESSAGE'; device_id: string; chat_id: string; text: string }
-  | { type: 'BEGIN_ASSISTANT_MESSAGE'; device_id: string; chat_id: string }
   | { type: 'APPEND_CHUNK'; chat_id: string; text: string }
   | { type: 'FINALIZE_STREAM'; chat_id: string }
   | { type: 'ADD_ERROR_MESSAGE'; chat_id: string; device_id: string; message: string; code: string }
@@ -74,27 +73,6 @@ function reducer(state: ChatState, action: Action): ChatState {
       }
       // Use the provided chat_id (caller just generated it)
       const updated: DeviceChat = {
-        chat_id: action.chat_id,
-        messages: [...existing.messages, msg],
-      }
-      return { ...state, chats: { ...state.chats, [action.device_id]: updated } }
-    }
-
-    case 'BEGIN_ASSISTANT_MESSAGE': {
-      const existing = getOrCreateChat(state.chats, action.device_id)
-      // Only begin if the chat_id matches (guard against stale events)
-      if (existing.chat_id !== action.chat_id && state.chats[action.device_id]) {
-        return state
-      }
-      const msg: ChatMessage = {
-        id: makeId(),
-        role: 'assistant',
-        text: '',
-        streaming: true,
-        timestamp: Date.now(),
-      }
-      const updated: DeviceChat = {
-        ...existing,
         chat_id: action.chat_id,
         messages: [...existing.messages, msg],
       }

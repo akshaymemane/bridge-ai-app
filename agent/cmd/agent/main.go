@@ -439,27 +439,11 @@ func processMessage(a *Agent, sendMsg func([]byte), msg InboundMsg) {
 				continue
 			}
 
-				// Sentinel found — stream everything before it (trim only trailing
-				// whitespace at the very end of the response), then end.
-				if outputFile != "" {
-					content, readErr := os.ReadFile(outputFile)
-					_ = os.Remove(outputFile)
-					if readErr == nil {
-						text := strings.TrimRight(string(content), "\n ")
-						if text != "" {
-							sendChunk(sendMsg, msg.ChatID, text)
-						}
-						sendStreamEnd(sendMsg, msg.ChatID)
-						slog.Info("stream complete from tool output file", "chat_id", msg.ChatID, "session", session)
-						return
-					}
-					slog.Warn("failed to read tool output file, falling back to pane capture", "chat_id", msg.ChatID, "path", outputFile, "err", readErr)
-				}
-
-				before := strings.TrimRight(newContent[:sentinelIdx], "\n ")
-				if before != "" {
-					sendChunk(sendMsg, msg.ChatID, before)
-				}
+			// Sentinel found — emit everything before it, then end stream.
+			before := strings.TrimRight(newContent[:sentinelIdx], "\n ")
+			if before != "" {
+				sendChunk(sendMsg, msg.ChatID, before)
+			}
 			sendStreamEnd(sendMsg, msg.ChatID)
 			slog.Info("stream complete", "chat_id", msg.ChatID, "session", session)
 			return
