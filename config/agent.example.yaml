@@ -12,19 +12,14 @@ tools:
     args: ["exec", "--full-auto"]   # Add --skip-git-repo-check if your workspace is not a git repo.
     continue_args: []       # Leave empty for now; per-chat Codex resume needs explicit session-id handling.
     working_dir: ..         # Optional cwd for tool execution; relative paths resolve from this config file.
+    fallback_tool: openclaw # If codex binary is missing, try this tool instead.
 
   openclaw:
     cmd: openclaw           # Binary that must be on PATH on this device.
     args: []                # Extra args passed before the message. Use ["-p"] for one-shot CLIs like claude.
     continue_args: []       # Optional args for follow-up turns, e.g. ["--continue", "-p"] for Claude CLI.
     working_dir: .          # Optional; omit to inherit the agent process working directory.
-
-  # Example for Codex CLI:
-  # codex:
-  #   cmd: codex
-  #   args: ["exec", "--full-auto"]
-  #   continue_args: []
-  #   working_dir: ..
+    # fallback_tool: claude  # Uncomment to chain further fallbacks.
 
   # Example for Claude Code CLI with conversation resume:
   # claude:
@@ -33,6 +28,8 @@ tools:
   #   continue_args: ["--continue", "-p"]
 
 default_tool: codex         # Tool used when the UI sends a message with no explicit tool.
+                            # Also the final fallback if a tool's binary is missing and no
+                            # fallback_tool is configured.
 
 gateway:
   url: ws://100.x.x.x:8080/agent   # Gateway WebSocket URL. Replace IP with your

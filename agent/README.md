@@ -41,6 +41,34 @@ On startup the agent:
 1. Verifies `tmux` is on PATH — exits with a clear error if missing.
 2. Warns (but does not abort) for any configured tool binary that is not on PATH.
 
+## Tool fallback
+
+If a tool's binary is missing from PATH, the agent walks a fallback chain rather than failing immediately:
+
+1. Try `fallback_tool` configured on the tool (if set).
+2. Try `default_tool` from the top-level config (if different).
+3. Error with `tool_not_found` only if every candidate is unreachable.
+
+The same fallback logic applies when the UI requests a tool that is not configured at all.
+
+```yaml
+tools:
+  codex:
+    cmd: codex
+    args: ["exec", "--full-auto"]
+    continue_args: []
+    fallback_tool: openclaw   # try openclaw if codex binary is missing
+
+  openclaw:
+    cmd: openclaw
+    args: []
+    continue_args: []
+
+default_tool: codex           # also used as last-resort fallback
+```
+
+Fallback chains are cycle-safe — if a cycle is detected the agent errors immediately.
+
 ## Session model
 
 Each `chat_id` maps to a tmux session named `bridge-{chat_id}`.

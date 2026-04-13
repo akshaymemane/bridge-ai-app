@@ -63,6 +63,7 @@ type ToolConfig struct {
 	Args         []string `yaml:"args"`          // args for the first message in a session, e.g. ["-p"]
 	ContinueArgs []string `yaml:"continue_args"` // args for follow-up messages, e.g. ["--continue", "-p"]
 	WorkingDir   string   `yaml:"working_dir"`   // optional cwd for the tool; relative paths resolve from the config file directory
+	FallbackTool string   `yaml:"fallback_tool"` // tool to try if this tool's binary is missing from PATH
 }
 
 type Config struct {
@@ -240,6 +241,70 @@ func tmuxCapturePane(session string) (string, error) {
 }
 
 // ---------------------------------------------------------------------------
+// Tool resolution with fallback chain
+// ---------------------------------------------------------------------------
+
+// resolveToolCfg walks the fallback chain for the requested tool name and
+// returns the first tool whose binary is reachable on PATH.
+//
+// Resolution order for each candidate:
+//  1. Look up in cfg.Tools. If missing, jump to cfg.DefaultTool.
+//  2. Check binary with exec.LookPath. If missing:
+//     a. Try ToolConfig.FallbackTool (if set and not yet visited).
+//     b. Try cfg.DefaultTool (if different and not yet visited).
+//
+// Cycle detection prevents infinite loops in misconfigured fallback chains.
+func resolveToolCfg(cfg *Config, requestedTool string) (name string, tc ToolConfig, err error) {
+	visited := make(map[string]bool)
+
+	current := requestedTool
+	if current == "" {
+		current = cfg.DefaultTool
+	}
+
+	for {
+		if visited[current] {
+			return "", ToolConfig{}, fmt.Errorf("tool fallback cycle detected at %q", current)
+		}
+		visited[current] = true
+
+		candidate, ok := cfg.Tools[current]
+		if !ok {
+			// Tool not configured — fall back to default if we haven't tried it.
+			if current != cfg.DefaultTool && cfg.DefaultTool != "" && !visited[cfg.DefaultTool] {
+				slog.Warn("tool not configured, trying default", "tool", current, "default", cfg.DefaultTool)
+				current = cfg.DefaultTool
+				continue
+			}
+			return "", ToolConfig{}, fmt.Errorf("tool not configured: %s", current)
+		}
+
+		if _, lookErr := exec.LookPath(candidate.Cmd); lookErr == nil {
+			if current != requestedTool && requestedTool != "" {
+				slog.Info("using fallback tool", "requested", requestedTool, "resolved", current)
+			}
+			return current, candidate, nil
+		}
+
+		// Binary missing — try per-tool fallback, then default.
+		if candidate.FallbackTool != "" && !visited[candidate.FallbackTool] {
+			slog.Warn("tool binary missing, trying fallback_tool",
+				"tool", current, "cmd", candidate.Cmd, "fallback", candidate.FallbackTool)
+			current = candidate.FallbackTool
+			continue
+		}
+		if current != cfg.DefaultTool && cfg.DefaultTool != "" && !visited[cfg.DefaultTool] {
+			slog.Warn("tool binary missing, trying default_tool",
+				"tool", current, "cmd", candidate.Cmd, "default", cfg.DefaultTool)
+			current = cfg.DefaultTool
+			continue
+		}
+
+		return "", ToolConfig{}, fmt.Errorf("tool binary not found: %s (cmd: %s)", current, candidate.Cmd)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Session processor — one goroutine per active send_message
 // ---------------------------------------------------------------------------
 
@@ -258,24 +323,15 @@ func processMessage(a *Agent, sendMsg func([]byte), msg InboundMsg) {
 		return
 	}
 
-	// Resolve tool.
-	toolName := msg.Tool
-	if toolName == "" {
-		toolName = cfg.DefaultTool
-	}
-	toolCfg, ok := cfg.Tools[toolName]
-	if !ok {
-		sendErr(sendMsg, msg.ChatID, "tool_not_found", "tool not configured: "+toolName)
+	// Resolve tool — walks fallback chain if requested tool is missing or binary not found.
+	resolvedTool, toolCfg, toolErr := resolveToolCfg(cfg, msg.Tool)
+	if toolErr != nil {
+		slog.Error("tool resolution failed", "requested", msg.Tool, "err", toolErr)
+		sendErr(sendMsg, msg.ChatID, "tool_not_found", toolErr.Error())
 		return
 	}
+	slog.Info("tool resolved", "chat_id", msg.ChatID, "requested", msg.Tool, "resolved", resolvedTool)
 	workingDir := resolveWorkingDir(cfg.BaseDir, toolCfg.WorkingDir)
-
-	// Verify tool binary exists.
-	if _, err := exec.LookPath(toolCfg.Cmd); err != nil {
-		slog.Error("tool binary not found", "tool", toolName, "cmd", toolCfg.Cmd)
-		sendErr(sendMsg, msg.ChatID, "tool_not_found", "tool binary not found: "+toolCfg.Cmd)
-		return
-	}
 
 	session := tmuxSessionName(msg.ChatID)
 
