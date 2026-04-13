@@ -64,6 +64,7 @@ type ToolConfig struct {
 	ContinueArgs []string `yaml:"continue_args"` // args for follow-up messages, e.g. ["--continue", "-p"]
 	WorkingDir   string   `yaml:"working_dir"`   // optional cwd for the tool; relative paths resolve from the config file directory
 	FallbackTool string   `yaml:"fallback_tool"` // tool to try if this tool's binary is missing from PATH
+	Direct       bool     `yaml:"direct"`        // run the tool directly (capture stdout), skip tmux pane scanning
 }
 
 type Config struct {
@@ -360,6 +361,40 @@ func processMessage(a *Agent, sendMsg func([]byte), msg InboundMsg) {
 	invocationArgs := toolCfg.Args
 	if !isFirst && len(toolCfg.ContinueArgs) > 0 {
 		invocationArgs = toolCfg.ContinueArgs
+	}
+
+	// Direct mode: run the tool as a subprocess and capture stdout.
+	// Use this for one-shot CLIs (e.g. claude -p) that don't need a persistent
+	// shell session. Avoids the tmux pane-scanning approach, which breaks when
+	// the response fits within the pane's fixed row height (no scrollback growth).
+	if toolCfg.Direct {
+		ctx, cancel := context.WithTimeout(context.Background(), sessionTimeout)
+		defer cancel()
+
+		stdout, stderr, err := runDirectTool(ctx, toolCfg.Cmd, invocationArgs, msg.Text, workingDir)
+		if err != nil {
+			errMsg := strings.TrimSpace(stderr)
+			if errMsg == "" {
+				errMsg = strings.TrimSpace(stdout)
+			}
+			if errMsg == "" {
+				errMsg = err.Error()
+			}
+			slog.Error("direct tool run failed", "tool", resolvedTool, "chat_id", msg.ChatID, "err", errMsg)
+			sendErr(sendMsg, msg.ChatID, "session_error", errMsg)
+			sendStreamEnd(sendMsg, msg.ChatID)
+			return
+		}
+		text := strings.TrimSpace(stdout)
+		if text == "" {
+			text = strings.TrimSpace(stderr)
+		}
+		if text != "" {
+			sendChunk(sendMsg, msg.ChatID, text)
+		}
+		sendStreamEnd(sendMsg, msg.ChatID)
+		slog.Info("direct tool run complete", "tool", resolvedTool, "chat_id", msg.ChatID)
+		return
 	}
 
 	outputFile := ""

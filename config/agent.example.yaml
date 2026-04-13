@@ -21,11 +21,13 @@ tools:
     working_dir: .          # Optional; omit to inherit the agent process working directory.
     # fallback_tool: claude  # Uncomment to chain further fallbacks.
 
-  # Example for Claude Code CLI with conversation resume:
+  # Claude Code CLI — direct mode (captures stdout, no tmux pane scanning).
+  # Use direct: true for any one-shot CLI that reads stdin/args and prints to stdout.
   # claude:
   #   cmd: claude
   #   args: ["-p"]
   #   continue_args: ["--continue", "-p"]
+  #   direct: true
 
 default_tool: codex         # Tool used when the UI sends a message with no explicit tool.
                             # Also the final fallback if a tool's binary is missing and no
