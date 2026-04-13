@@ -52,15 +52,15 @@ bash install-agent.sh</pre>
 tools:
   claude:
     cmd: claude
-    args: ["-p"]
-    continue_args: ["--continue", "-p"]
+    args: ["-p", "--dangerously-skip-permissions"]
+    continue_args: ["--continue", "-p", "--dangerously-skip-permissions"]
     direct: true
 
 default_tool: claude
 
 gateway:
   url: ws://100.101.102.103:8080/agent</pre>
-      <p><code>direct: true</code> is required for Claude. Use Tailscale IPs or MagicDNS names for the gateway URL.</p>
+      <p><code>direct: true</code> is required for Claude. <code>--dangerously-skip-permissions</code> prevents Claude from blocking on interactive permission prompts that have no stdin to answer them. Use Tailscale IPs or MagicDNS names for the gateway URL.</p>
     </div>
   </section>
 </BaseLayout>

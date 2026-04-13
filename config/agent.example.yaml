@@ -22,11 +22,12 @@ tools:
     # fallback_tool: claude  # Uncomment to chain further fallbacks.
 
   # Claude Code CLI — direct mode (captures stdout, no tmux pane scanning).
-  # Use direct: true for any one-shot CLI that reads stdin/args and prints to stdout.
+  # --dangerously-skip-permissions bypasses interactive tool permission prompts,
+  # which would otherwise block indefinitely since there is no stdin connected.
   # claude:
   #   cmd: claude
-  #   args: ["-p"]
-  #   continue_args: ["--continue", "-p"]
+  #   args: ["-p", "--dangerously-skip-permissions"]
+  #   continue_args: ["--continue", "-p", "--dangerously-skip-permissions"]
   #   direct: true
 
 default_tool: codex         # Tool used when the UI sends a message with no explicit tool.

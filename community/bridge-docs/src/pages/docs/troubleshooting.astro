@@ -36,7 +36,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       <div class="eyebrow">Claude</div>
       <h2>Claude replies never arrive</h2>
       <ul class="list tight">
-        <li>Check that <code>direct: true</code> is set for the claude tool in <code>agent.yaml</code> — without it, short responses silently time out due to tmux pane row-count not growing</li>
+        <li>Check that <code>direct: true</code> is set for the claude tool in <code>agent.yaml</code> — without it, short responses silently time out</li>
+        <li>Check that <code>--dangerously-skip-permissions</code> is in both <code>args</code> and <code>continue_args</code> — without it, Claude blocks on a permission prompt waiting for stdin that never arrives; you will receive Claude's "grant permission" text as the reply instead of an actual response</li>
         <li>Run <code>claude -p "hi"</code> on the agent device directly to rule out login or quota issues</li>
         <li>If you see auth or limit errors there, BridgeAIChat cannot fix them — resolve them on the device first</li>
         <li>Switch to Codex temporarily if you want to keep testing while Claude quota is exhausted</li>

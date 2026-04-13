@@ -19,12 +19,12 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
       <pre>tools:
   claude:
     cmd: claude
-    args: ["-p"]
-    continue_args: ["--continue", "-p"]
+    args: ["-p", "--dangerously-skip-permissions"]
+    continue_args: ["--continue", "-p", "--dangerously-skip-permissions"]
     direct: true
 
 default_tool: claude</pre>
-      <p><code>direct: true</code> runs Claude as a subprocess and returns its stdout. No tmux session is needed. Conversation context is preserved via Claude's built-in <code>--continue</code> flag between turns.</p>
+      <p><code>direct: true</code> runs Claude as a subprocess and returns its stdout. <code>--dangerously-skip-permissions</code> bypasses interactive tool permission prompts — without it, Claude will block indefinitely waiting for stdin that never arrives. Conversation context is preserved via Claude's built-in <code>--continue</code> flag.</p>
     </div>
 
     <div class="card stack">
@@ -50,7 +50,8 @@ default_tool: claude</pre>
       <div class="eyebrow">Common blockers</div>
       <h2>What usually goes wrong</h2>
       <ul class="list tight">
-        <li>Missing <code>direct: true</code> in agent.yaml — responses silently time out</li>
+        <li>Missing <code>direct: true</code> — responses silently time out</li>
+        <li>Missing <code>--dangerously-skip-permissions</code> — Claude blocks on a permission prompt with no stdin to answer it; you see Claude's "grant permission" message instead of a real reply</li>
         <li>The device is not logged into Claude CLI</li>
         <li>Hourly or daily quota exhausted on the account</li>
         <li>The configured <code>cmd</code> path does not match the installed Claude binary</li>
