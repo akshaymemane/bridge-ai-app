@@ -1,32 +1,59 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 ---
-<BaseLayout title="BridgeAIChat Claude Guide" description="Run Claude CLI behind BridgeAIChat with the right expectations for auth and quota.">
+<BaseLayout title="BridgeAIChat Claude Guide" description="Configure Claude CLI as a BridgeAIChat tool with direct mode for reliable responses.">
   <section class="surface">
     <div class="eyebrow">Tool Guide</div>
-    <h1>Claude works, but device state matters.</h1>
+    <h1>Claude is a first-class tool — set <code>direct: true</code>.</h1>
     <p class="lede">
-      BridgeAIChat can call Claude CLI from the agent device, but the real runtime behavior still depends on whether
-      that device is logged in and whether the account has quota remaining.
+      Claude CLI works well with BridgeAIChat. The one required config flag is <code>direct: true</code>, which
+      runs Claude as a direct subprocess and captures stdout — bypassing tmux pane scanning, which breaks for
+      short responses.
     </p>
+  </section>
+
+  <section class="section-gap grid two">
+    <div class="card stack">
+      <div class="eyebrow">Recommended config</div>
+      <h2>Minimal Claude block</h2>
+      <pre>tools:
+  claude:
+    cmd: claude
+    args: ["-p"]
+    continue_args: ["--continue", "-p"]
+    direct: true
+
+default_tool: claude</pre>
+      <p><code>direct: true</code> runs Claude as a subprocess and returns its stdout. No tmux session is needed. Conversation context is preserved via Claude's built-in <code>--continue</code> flag between turns.</p>
+    </div>
+
+    <div class="card stack">
+      <div class="eyebrow">Why direct: true</div>
+      <h2>What it fixes</h2>
+      <ul class="list tight">
+        <li>The tmux pane-scanning path tracks new content by row count. A 24-row pane with a short response never grows in row count — the sentinel is never detected and responses time out.</li>
+        <li><code>direct: true</code> runs <code>claude -p "…"</code> as a subprocess, captures stdout when it exits, and streams it back. No pane scanning, no sentinel.</li>
+        <li>Follow-up turns use <code>continue_args: ["--continue", "-p"]</code> automatically — conversation context is preserved through Claude's own session state.</li>
+      </ul>
+    </div>
   </section>
 
   <section class="section-gap grid two">
     <div class="card">
       <div class="eyebrow">Before you test</div>
-      <h2>Check the local device directly</h2>
+      <h2>Verify the local device</h2>
       <pre>claude -p "hi"</pre>
-      <p>If that command fails on the machine itself, BridgeAIChat will not be able to produce a successful reply through the agent either.</p>
+      <p>If that command fails on the agent device directly, BridgeAIChat cannot fix it. Check login state and quota first.</p>
     </div>
 
     <div class="card">
       <div class="eyebrow">Common blockers</div>
       <h2>What usually goes wrong</h2>
       <ul class="list tight">
+        <li>Missing <code>direct: true</code> in agent.yaml — responses silently time out</li>
         <li>The device is not logged into Claude CLI</li>
-        <li>The daily or hourly quota has been exhausted</li>
-        <li>The configured command path does not match the installed Claude binary</li>
-        <li>The user expects persistent Claude conversation state, but the beta path is still safer with one-shot calls</li>
+        <li>Hourly or daily quota exhausted on the account</li>
+        <li>The configured <code>cmd</code> path does not match the installed Claude binary</li>
       </ul>
     </div>
   </section>

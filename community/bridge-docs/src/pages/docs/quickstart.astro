@@ -9,7 +9,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       Preferred path on macOS is Homebrew. If you are testing before the tap is public, use the packaged release
       installers instead. The runtime shape stays the same either way.
     </p>
-    <div class="status section"><strong>Beta note:</strong> Codex is the smoothest first-run path today. Claude works, but local auth and quota state still matter on the device.</div>
+    <div class="status section"><strong>Beta note:</strong> Both Codex and Claude work in the current beta. Claude requires <code>direct: true</code> in <code>agent.yaml</code> — see the <a href="/docs/tools/claude">Claude guide</a>. Local auth and quota still apply on each device regardless of tool.</div>
   </section>
 
   <section class="section-gap step-list">
@@ -51,8 +51,8 @@ bash "$(brew --prefix)/share/bridge-agent/install-agent.sh"</pre>
       <h2>Before you start</h2>
       <ul class="list tight">
         <li>Tailscale on the control host and every agent device</li>
-        <li><code>tmux</code> installed on every agent device</li>
-        <li>A supported AI CLI on the agent device, such as Codex or Claude</li>
+        <li><code>tmux</code> installed on agent devices using Codex or tmux-backed tools (not required for Claude with <code>direct: true</code>)</li>
+        <li>A supported AI CLI on the agent device: Codex, Claude, or Ollama</li>
         <li>The gateway running before the first agent attempts to connect</li>
       </ul>
     </div>

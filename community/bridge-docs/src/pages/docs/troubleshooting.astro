@@ -36,9 +36,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       <div class="eyebrow">Claude</div>
       <h2>Claude replies never arrive</h2>
       <ul class="list tight">
-        <li>Run <code>claude -p "hi"</code> on the agent device directly</li>
-        <li>If you see login or limit errors there, BridgeAIChat cannot fix them on your behalf</li>
-        <li>Switch to Codex temporarily if you want to keep testing the app while Claude quota is exhausted</li>
+        <li>Check that <code>direct: true</code> is set for the claude tool in <code>agent.yaml</code> — without it, short responses silently time out due to tmux pane row-count not growing</li>
+        <li>Run <code>claude -p "hi"</code> on the agent device directly to rule out login or quota issues</li>
+        <li>If you see auth or limit errors there, BridgeAIChat cannot fix them — resolve them on the device first</li>
+        <li>Switch to Codex temporarily if you want to keep testing while Claude quota is exhausted</li>
       </ul>
     </div>
 
@@ -46,8 +47,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
       <div class="eyebrow">Runtime</div>
       <h2>tmux is missing</h2>
       <ul class="list tight">
-        <li>Install <code>tmux</code> on the device before starting the agent</li>
-        <li>The installer warns about this, but the agent still needs tmux for the beta runtime model</li>
+        <li>tmux is required for Codex and any tool that does not set <code>direct: true</code></li>
+        <li>Claude with <code>direct: true</code> does not use tmux — you can run Claude-only agents without tmux installed</li>
+        <li>If you are using Codex, install tmux before starting the agent: <code>brew install tmux</code> or <code>apt install tmux</code></li>
       </ul>
     </div>
   </section>

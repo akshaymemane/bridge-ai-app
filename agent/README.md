@@ -41,6 +41,25 @@ On startup the agent:
 1. Verifies `tmux` is on PATH — exits with a clear error if missing.
 2. Warns (but does not abort) for any configured tool binary that is not on PATH.
 
+## Direct mode
+
+Set `direct: true` on any tool that is a one-shot CLI reading from arguments and writing to stdout.
+
+```yaml
+tools:
+  claude:
+    cmd: claude
+    args: ["-p"]
+    continue_args: ["--continue", "-p"]
+    direct: true
+```
+
+In direct mode the agent runs the tool as a subprocess, captures stdout when it exits, and streams it back to the gateway. tmux is not used.
+
+**Why this matters:** the tmux pane-scanning path tracks new output by counting visual rows. A 24-row pane with a short response never grows in row count — the sentinel is never detected and the response times out. Direct mode avoids this completely. Use it for all one-shot CLIs (Claude `-p`, any tool that takes input via args and prints a single response).
+
+Tools without `direct: true` use the tmux path, which is still correct for interactive or long-running CLIs that need a persistent shell session.
+
 ## Tool fallback
 
 If a tool's binary is missing from PATH, the agent walks a fallback chain rather than failing immediately:

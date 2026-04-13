@@ -35,23 +35,32 @@ bash install-agent.sh</pre>
       <div class="eyebrow">Requirements</div>
       <h2>What must exist on the device</h2>
       <ul class="list tight">
-        <li><code>tmux</code> must be installed</li>
+        <li><code>tmux</code> required for Codex and tmux-backed tools; not required for Claude with <code>direct: true</code></li>
         <li>Tailscale must be able to reach the gateway</li>
-        <li>An AI CLI must already be installed locally</li>
-        <li>The CLI command and args in <code>agent.yaml</code> must match what is actually available on the device</li>
+        <li>An AI CLI must already be installed locally (Claude, Codex, or Ollama)</li>
+        <li>The <code>cmd</code>, <code>args</code>, and <code>direct</code> flags in <code>agent.yaml</code> must match the installed CLI</li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card stack">
       <div class="eyebrow">Example</div>
-      <h2>Minimal gateway block</h2>
+      <h2>Claude config block</h2>
       <pre>device:
   id: macbook-pro
-  name: Akshay's MacBook Pro
+  name: My MacBook Pro
+
+tools:
+  claude:
+    cmd: claude
+    args: ["-p"]
+    continue_args: ["--continue", "-p"]
+    direct: true
+
+default_tool: claude
 
 gateway:
   url: ws://100.101.102.103:8080/agent</pre>
-      <p>Use Tailscale IPs or MagicDNS names instead of public internet routing for the first beta.</p>
+      <p><code>direct: true</code> is required for Claude. Use Tailscale IPs or MagicDNS names for the gateway URL.</p>
     </div>
   </section>
 </BaseLayout>
