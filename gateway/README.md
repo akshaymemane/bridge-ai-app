@@ -1,66 +1,69 @@
 # gateway
 
-Go WebSocket gateway for BridgeAIChat.
+Go gateway for BridgeAIChat. It serves the web UI, accepts browser and agent websocket connections, stores the selected tailnet in the browser session, and fetches devices from the Tailscale API.
 
 ## Requirements
 
 - Go 1.22+
+- `TAILSCALE_CLIENT_ID`
+- `TAILSCALE_CLIENT_SECRET`
+- optional `TAILSCALE_API_BASE` override
+- `APP_URL` matching the browser origin
 
 ## Build
 
 ```bash
 cd gateway
-go mod tidy
 go build ./cmd/gateway
 ```
 
 ## Run
 
 ```bash
-./gateway
-# or
+export TAILSCALE_CLIENT_ID=tsid_xxx
+export TAILSCALE_CLIENT_SECRET=tssecret_xxx
+export TAILSCALE_API_BASE=https://api.tailscale.com/api/v2
+export APP_URL=http://localhost:8080
+
 go run ./cmd/gateway
 ```
 
-Listens on `:8080` by default.
+The gateway listens on `:8080` by default.
 
 ## Endpoints
 
-| Endpoint    | Protocol  | Purpose                              |
-|-------------|-----------|--------------------------------------|
-| `/ws`       | WebSocket | Browser UI connects here             |
-| `/agent`    | WebSocket | Bridge-agent connects here           |
-| `/devices`  | HTTP GET  | Returns JSON list of connected devices |
+| Endpoint       | Protocol  | Purpose |
+|----------------|-----------|---------|
+| `/ws`          | WebSocket | Browser UI connects here |
+| `/agent`       | WebSocket | Bridge agent connects here |
+| `/api/session` | HTTP POST | Stores the selected tailnet in the session |
+| `/api/logout`  | HTTP POST | Clears the current session |
+| `/api/devices` | HTTP GET  | Returns Tailscale devices merged with live agents |
 
-## GET /devices response
-
-```json
-[
-  {
-    "device_id": "raspberry-pi",
-    "name": "Raspberry Pi",
-    "status": "online"
-  }
-]
-```
-
-## Failure states
-
-| Condition               | Behaviour                                              |
-|-------------------------|--------------------------------------------------------|
-| Agent disconnects        | Gateway synthesises `device_status offline` to all UIs |
-| Unknown `device_id`      | Error `device_unreachable` sent to requesting UI       |
-| Agent send buffer full   | Error `device_unreachable` sent to requesting UI       |
-| Invalid JSON from UI     | Error `session_error` sent back to that UI             |
-
-All errors are structured JSON on the WebSocket:
+## `GET /api/devices` response
 
 ```json
-{ "type": "error", "chat_id": "...", "code": "device_unreachable", "message": "..." }
+{
+  "devices": [
+    {
+      "id": "akshays-macbook-pro-2-93d3b409",
+      "hostname": "Akshay's MacBook Pro (2)",
+      "name": "Akshay's MacBook Pro (2)",
+      "os": "macOS",
+      "online": true,
+      "status": "connected",
+      "tailnet_id": "tail427f1a.ts.net"
+    }
+  ]
+}
 ```
 
-Error codes: `device_unreachable`, `tmux_missing`, `tool_not_found`, `session_error`
+Statuses:
+
+- `connected`: device is online in Tailscale and a Bridge agent is connected
+- `agent_missing`: device is online in Tailscale but no Bridge agent is connected
+- `offline`: device is offline in Tailscale
 
 ## Logs
 
-Structured JSON logs via `log/slog` to stdout. Example fields: `device_id`, `chat_id`, `remote`, `err`.
+Structured JSON logs via `log/slog` to stdout. Common fields include `device_id`, `chat_id`, `tailnet_id`, `remote`, and `err`.

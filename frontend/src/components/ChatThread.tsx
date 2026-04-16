@@ -18,6 +18,7 @@ export function ChatThread() {
 
   const selectedDevice = devices.find((d) => d.device_id === selectedDeviceId)
   const isOffline = selectedDevice?.status === 'offline'
+  const isAgentMissing = selectedDevice?.status === 'agent_missing'
 
   // No device selected
   if (!selectedDeviceId) {
@@ -35,10 +36,14 @@ export function ChatThread() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Offline notice banner */}
-      {isOffline && (
+      {(isOffline || isAgentMissing) && (
         <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-800/60 border-b border-surface-5 text-gray-400 text-xs">
           <WifiOff size={12} />
-          <span>This device is offline. Messages cannot be sent.</span>
+          <span>
+            {isAgentMissing
+              ? 'This device is online in Tailscale, but the Bridge agent is not connected.'
+              : 'This device is offline. Messages cannot be sent.'}
+          </span>
         </div>
       )}
 
@@ -51,6 +56,8 @@ export function ChatThread() {
             <p className="text-sm text-gray-500">
               {isOffline
                 ? 'Device is offline. Waiting for it to reconnect…'
+                : isAgentMissing
+                  ? 'Install or restart the Bridge agent on this device to begin chatting.'
                 : 'Send a message to start the conversation.'}
             </p>
           </div>

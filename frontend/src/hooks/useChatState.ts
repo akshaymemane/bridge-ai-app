@@ -13,7 +13,7 @@ interface ChatState {
 
 type Action =
   | { type: 'SET_DEVICES'; devices: Device[] }
-  | { type: 'UPDATE_DEVICE_STATUS'; device_id: string; name?: string; status: 'online' | 'offline' }
+  | { type: 'UPDATE_DEVICE_STATUS'; device_id: string; id?: string; name?: string; hostname?: string; os?: string; online?: boolean; status: Device['status']; tools?: string[] }
   | { type: 'ADD_USER_MESSAGE'; device_id: string; chat_id: string; text: string }
   | { type: 'APPEND_CHUNK'; chat_id: string; text: string }
   | { type: 'FINALIZE_STREAM'; chat_id: string }
@@ -37,7 +37,16 @@ function reducer(state: ChatState, action: Action): ChatState {
       // Merge incoming devices with any existing status updates
       const merged = action.devices.map((d) => {
         const existing = state.devices.find((e) => e.device_id === d.device_id)
-        return existing ? { ...d, status: existing.status } : d
+        return existing
+          ? {
+              ...d,
+              status: d.status,
+              hostname: existing.hostname ?? d.hostname,
+              os: existing.os ?? d.os,
+              online: existing.online ?? d.online,
+              tools: existing.tools ?? d.tools,
+            }
+          : d
       })
       return { ...state, devices: merged }
     }
@@ -47,9 +56,14 @@ function reducer(state: ChatState, action: Action): ChatState {
       if (!exists) {
         // Device connected after page load — insert it so it appears in the sidebar.
         const newDevice: Device = {
+          id: action.id ?? action.device_id,
           device_id: action.device_id,
           name: action.name ?? action.device_id,
+          hostname: action.hostname,
+          os: action.os,
+          online: action.online,
           status: action.status,
+          tools: action.tools ?? [],
         }
         return { ...state, devices: [...state.devices, newDevice] }
       }
@@ -57,7 +71,16 @@ function reducer(state: ChatState, action: Action): ChatState {
         ...state,
         devices: state.devices.map((d) =>
           d.device_id === action.device_id
-            ? { ...d, name: action.name ?? d.name, status: action.status }
+            ? {
+                ...d,
+                id: action.id ?? d.id,
+                name: action.name ?? d.name,
+                hostname: action.hostname ?? d.hostname,
+                os: action.os ?? d.os,
+                online: action.online ?? d.online,
+                status: action.status,
+                tools: action.tools ?? d.tools,
+              }
             : d
         ),
       }
@@ -179,8 +202,13 @@ export function useChatState() {
         dispatch({
           type: 'UPDATE_DEVICE_STATUS',
           device_id: event.device_id,
+          id: event.id,
           name: event.name,
+          hostname: event.hostname,
+          os: event.os,
+          online: event.online,
           status: event.status,
+          tools: event.tools,
         })
         break
 

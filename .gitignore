@@ -3,10 +3,6 @@ dist/
 frontend/dist/
 gateway/gateway
 gateway/bridge-gateway
-agent/bridge-agent
-agent/bridge-agent-*
-agent/agent
-community/bridge-agent/bridge-agent
 
 # Go binaries (any platform cross-compiled output)
 *.exe
@@ -15,14 +11,6 @@ community/bridge-agent/bridge-agent
 # Node
 **/node_modules/
 frontend/.env.local
-
-# Agent runtime state — contains session IDs, never commit
-agent/.bridge-sessions.json
-**/.bridge-sessions.json
-
-# Agent config — contains real device IDs and gateway URLs
-# agent.yaml is for local use only; agent.yaml.example IS committed
-agent/agent.yaml
 
 # macOS
 .DS_Store

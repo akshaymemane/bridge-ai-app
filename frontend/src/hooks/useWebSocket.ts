@@ -6,6 +6,7 @@ const MAX_RECONNECT_DELAY_MS = 30000
 
 interface UseWebSocketOptions {
   url: string
+  enabled?: boolean
   onEvent: (event: GatewayEvent) => void
   onStatusChange: (status: WsStatus) => void
 }
@@ -14,7 +15,7 @@ interface UseWebSocketReturn {
   send: (data: string) => void
 }
 
-export function useWebSocket({ url, onEvent, onStatusChange }: UseWebSocketOptions): UseWebSocketReturn {
+export function useWebSocket({ url, enabled = true, onEvent, onStatusChange }: UseWebSocketOptions): UseWebSocketReturn {
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectDelayRef = useRef(RECONNECT_DELAY_MS)
@@ -91,6 +92,12 @@ export function useWebSocket({ url, onEvent, onStatusChange }: UseWebSocketOptio
 
   useEffect(() => {
     unmountedRef.current = false
+    if (!enabled) {
+      onStatusChangeRef.current('disconnected')
+      return () => {
+        unmountedRef.current = true
+      }
+    }
     connect()
 
     return () => {
@@ -101,7 +108,7 @@ export function useWebSocket({ url, onEvent, onStatusChange }: UseWebSocketOptio
         wsRef.current = null
       }
     }
-  }, [connect])
+  }, [connect, enabled])
 
   const send = useCallback((data: string) => {
     const ws = wsRef.current

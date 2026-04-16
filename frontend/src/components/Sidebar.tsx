@@ -1,11 +1,11 @@
 import { ScrollArea } from './ui/ScrollArea'
-import { StatusDot } from './ui/Badge'
+import { Badge, StatusDot } from './ui/Badge'
 import { useApp } from '../context/AppContext'
 import { cn } from '../lib/utils'
-import { ServerCrash, Loader2 } from 'lucide-react'
+import { ServerCrash, Loader2, LogOut } from 'lucide-react'
 
 export function Sidebar() {
-  const { devices, devicesLoading, devicesError, selectedDeviceId, selectDevice } = useApp()
+  const { devices, devicesLoading, devicesError, selectedDeviceId, selectDevice, currentUser, logout } = useApp()
 
   return (
     <aside className="flex flex-col w-64 shrink-0 border-r border-surface-5 bg-surface-1 h-full">
@@ -77,8 +77,17 @@ export function Sidebar() {
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <StatusDot status={device.status} />
-                  <span className="text-[10px] text-gray-500 capitalize">{device.status}</span>
+                  <span className="text-[10px] text-gray-500 capitalize">{device.status.replace('_', ' ')}</span>
                 </div>
+                {device.tools && device.tools.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {device.tools.map((tool) => (
+                      <Badge key={tool} variant="offline" className="border-surface-4 bg-surface-4/70 text-[9px] text-gray-300">
+                        {tool}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </button>
           )
@@ -86,8 +95,23 @@ export function Sidebar() {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-surface-5">
-        <p className="text-[10px] text-gray-600">v1.0.0-alpha</p>
+      <div className="border-t border-surface-5 px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-xs text-gray-300">{currentUser?.name ?? 'Tailnet session'}</p>
+            <p className="truncate text-[10px] text-gray-600">{currentUser?.tailnet_id ?? 'Not connected'}</p>
+          </div>
+          {currentUser && (
+            <button
+              onClick={() => void logout()}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-surface-4 hover:text-gray-200"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut size={14} />
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   )

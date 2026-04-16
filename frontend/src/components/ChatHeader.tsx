@@ -47,7 +47,12 @@ export function ChatHeader() {
               </div>
               <div className="flex items-center gap-1.5">
                 <StatusDot status={device.status} />
-                <span className="text-[10px] text-gray-500 capitalize">{device.status}</span>
+                <span className="text-[10px] text-gray-500 capitalize">{device.status.replace('_', ' ')}</span>
+                {device.tools?.map((tool) => (
+                  <Badge key={tool} variant="offline" className="border-surface-4 bg-surface-4/70 text-[9px] text-gray-300">
+                    {tool}
+                  </Badge>
+                ))}
               </div>
             </div>
           </>

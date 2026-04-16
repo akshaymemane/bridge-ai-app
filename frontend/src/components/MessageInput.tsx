@@ -10,15 +10,17 @@ export function MessageInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const selectedDevice = devices.find((d) => d.device_id === selectedDeviceId)
-  const isOffline = selectedDevice?.status === 'offline'
+  const isUnavailable = selectedDevice?.status !== 'connected'
   const isDisconnected = wsStatus === 'disconnected' || wsStatus === 'error'
   const noDevice = !selectedDeviceId
 
-  const isDisabled = noDevice || isOffline || isDisconnected || isStreaming
+  const isDisabled = noDevice || isUnavailable || isDisconnected || isStreaming
 
   const placeholder = (() => {
     if (noDevice) return 'Select a device to start chatting…'
-    if (isOffline) return 'Device is offline…'
+    if (selectedDevice?.status === 'offline') return 'Device is offline…'
+    if (selectedDevice?.status === 'agent_missing') return 'Agent is not installed on this device…'
+    if (selectedDevice?.status === 'connecting') return 'Device is still connecting…'
     if (isDisconnected) return 'Reconnecting to gateway…'
     if (isStreaming) return 'AI is responding…'
     return `Message ${selectedDevice?.name ?? 'device'}…`

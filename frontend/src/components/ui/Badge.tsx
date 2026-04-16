@@ -36,10 +36,11 @@ export function Badge({ variant = 'offline', size = 'sm', className, children }:
 }
 
 /** Dot-only status indicator */
-export function StatusDot({ status }: { status: 'online' | 'offline' | 'connecting' }) {
+export function StatusDot({ status }: { status: 'connected' | 'offline' | 'agent_missing' | 'connecting' }) {
   const colorClass = {
-    online: 'bg-green-500',
+    connected: 'bg-green-500',
     offline: 'bg-gray-500',
+    agent_missing: 'bg-zinc-300',
     connecting: 'bg-yellow-400 animate-pulse',
   }[status]
 

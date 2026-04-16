@@ -1,9 +1,14 @@
 // ─── Device ────────────────────────────────────────────────────────────────
 
 export interface Device {
+  id: string
   device_id: string
   name: string
-  status: 'online' | 'offline'
+  hostname?: string
+  os?: string
+  online?: boolean
+  status: 'connected' | 'offline' | 'agent_missing' | 'connecting'
+  tools?: string[]
 }
 
 // ─── Messages (UI send) ────────────────────────────────────────────────────
@@ -21,26 +26,37 @@ export interface SendMessagePayload {
 export interface StreamChunkEvent {
   type: 'stream_chunk'
   chat_id: string
+  device_id?: string
+  user_id?: string
   text: string
 }
 
 export interface StreamEndEvent {
   type: 'stream_end'
   chat_id: string
+  device_id?: string
+  user_id?: string
 }
 
 export interface ErrorEvent {
   type: 'error'
   chat_id: string
+  device_id?: string
+  user_id?: string
   code: string
   message: string
 }
 
 export interface DeviceStatusEvent {
   type: 'device_status'
+  id?: string
   device_id: string
   name?: string   // present when gateway broadcasts a new device coming online
-  status: 'online' | 'offline'
+  hostname?: string
+  os?: string
+  online?: boolean
+  status: 'connected' | 'offline' | 'agent_missing' | 'connecting'
+  tools?: string[]
 }
 
 export type GatewayEvent =
@@ -74,3 +90,26 @@ export interface DeviceChat {
 // ─── WebSocket connection state ───────────────────────────────────────────
 
 export type WsStatus = 'connecting' | 'connected' | 'disconnected' | 'error'
+
+export interface SessionUser {
+  user_id: string
+  name?: string
+  tailnet_id: string
+}
+
+export interface AuthSessionResponse {
+  authenticated: boolean
+  user?: SessionUser
+}
+
+export interface DevicesResponse {
+  devices: Array<{
+    id: string
+    hostname?: string
+    name: string
+    os?: string
+    online: boolean
+    status: Device['status']
+    tools?: string[]
+  }>
+}

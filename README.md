@@ -1,30 +1,53 @@
 # BridgeAIChat App
 
-BridgeAIChat is a control-plane app for chatting with AI CLIs running across your own devices over Tailscale.
+BridgeAIChat is the control-plane app for chatting with AI CLIs running across your own devices over Tailscale.
 
-This repository is the `bridge-app` seed. It owns:
+This repository is the publishable `bridge-ai-app` repo. It owns:
 
-- gateway
-- frontend chat UI
-- local dev scripts
-- release packaging for gateway + UI bundles
+- the Go gateway
+- the frontend chat UI
+- local app dev scripts
+- app release packaging
 
-This repository does not represent the final community split by itself. The planned public repo layout is:
+The other beta repos now live independently:
 
-- `bridge-app` — gateway + UI + app release packaging
-- `bridge-agent` — remote device runtime and agent releases
-- `bridge-docs` — public website, docs, downloads, and compatibility matrix
-- `bridge-homebrew-tap` — package-manager install entrypoint for `brew install`
+- `bridge-ai-agent` — https://github.com/akshaymemane/bridge-ai-agent
+- `bridge-ai-docs` — https://github.com/akshaymemane/bridge-ai-docs
 
-Repo seeds for the other two repositories live under [community](/Users/apple/workspace/bridge-ai-chat/community).
+## Beta Flow
 
-## Quick Start
+The current beta uses a simple Tailscale-backed login:
 
-Run everything locally:
+1. Run the gateway with:
+   - `TAILSCALE_CLIENT_ID`
+   - `TAILSCALE_CLIENT_SECRET`
+   - `TAILSCALE_API_BASE`
+   - `APP_URL`
+2. Open the UI and enter a tailnet like `example.ts.net`
+3. The gateway loads devices from Tailscale and merges them with live Bridge agents
+
+Device states:
+
+- `connected`
+- `agent_missing`
+- `offline`
+
+## Local Development
+
+Run the gateway and frontend:
 
 ```bash
-bash run.sh
+./run.sh
 ```
+
+Or run them separately:
+
+```bash
+./run.sh gateway
+./run.sh ui
+```
+
+## Release Packaging
 
 Build an app release bundle:
 
@@ -32,27 +55,15 @@ Build an app release bundle:
 bash scripts/package-app-release.sh v0.1.0-beta.1
 ```
 
-## Release Scope
+Each app release contains:
 
-App release assets from this repo contain:
-
-- gateway binary
+- `bridge-gateway`
 - built frontend UI
 - `install-app.sh`
 - `run-gateway.sh`
-- release README
 - `SHA256SUMS.txt`
-
-They do not contain agent binaries.
-
-## Community Seeds
-
-- Agent repo seed: [community/bridge-agent](/Users/apple/workspace/bridge-ai-chat/community/bridge-agent)
-- Docs repo seed: [community/bridge-docs](/Users/apple/workspace/bridge-ai-chat/community/bridge-docs)
-- Homebrew tap seed: [community/bridge-homebrew-tap](/Users/apple/workspace/bridge-ai-chat/community/bridge-homebrew-tap)
 
 ## References
 
 - Product requirements: [BridgeAIChat_PRD.md](/Users/apple/workspace/bridge-ai-chat/BridgeAIChat_PRD.md)
 - Beta testing notes: [BETA_TESTING.md](/Users/apple/workspace/bridge-ai-chat/BETA_TESTING.md)
-- Distribution plan: [community/COMMUNITY_DISTRIBUTION.md](/Users/apple/workspace/bridge-ai-chat/community/COMMUNITY_DISTRIBUTION.md)
