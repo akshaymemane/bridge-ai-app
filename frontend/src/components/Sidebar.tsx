@@ -1,7 +1,7 @@
 import { ScrollArea } from './ui/ScrollArea'
 import { Badge, StatusDot } from './ui/Badge'
 import { useApp } from '../context/AppContext'
-import { cn } from '../lib/utils'
+import { cn, formatToolName } from '../lib/utils'
 import { ServerCrash, Loader2, LogOut } from 'lucide-react'
 
 export function Sidebar() {
@@ -83,7 +83,7 @@ export function Sidebar() {
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {device.tools.map((tool) => (
                       <Badge key={tool} variant="offline" className="border-surface-4 bg-surface-4/70 text-[9px] text-gray-300">
-                        {tool}
+                        {formatToolName(tool)}
                       </Badge>
                     ))}
                   </div>

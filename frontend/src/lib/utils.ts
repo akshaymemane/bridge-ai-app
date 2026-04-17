@@ -32,3 +32,18 @@ export function toWsUrl(gatewayUrl: string): string {
 export function formatTimestamp(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+export function preferredTool(tools: string[] | undefined): string {
+  if (!tools || tools.length === 0) return ''
+  const priorities = ['codex', 'claude', 'bridge', 'openclaw', 'ollama']
+  for (const tool of priorities) {
+    if (tools.includes(tool)) return tool
+  }
+  return tools[0]
+}
+
+export function formatToolName(tool: string): string {
+  if (!tool) return 'No Tool'
+  if (tool === 'bridge') return 'Bridge Helper'
+  return tool.charAt(0).toUpperCase() + tool.slice(1)
+}

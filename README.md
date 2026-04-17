@@ -25,6 +25,9 @@ The current beta uses a simple Tailscale-backed login:
    - `APP_URL`
 2. Open the UI and enter a tailnet like `example.ts.net`
 3. The gateway loads devices from Tailscale and merges them with live Bridge agents
+4. Pick an explicit tool in the chat header before sending:
+   - `Codex` or `Claude` for AI work
+   - `Bridge Helper` for safe read-only checks like `status`, `pwd`, `ls`, `read file <path>`, `tail <path>`, and `processes`
 
 Device states:
 

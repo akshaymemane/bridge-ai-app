@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext'
 import { MessageSquareDashed, WifiOff } from 'lucide-react'
 
 export function ChatThread() {
-  const { activeChat, selectedDeviceId, devices } = useApp()
+  const { activeChat, selectedDeviceId, devices, activeTool } = useApp()
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const messages = activeChat?.messages ?? []
@@ -58,7 +58,9 @@ export function ChatThread() {
                 ? 'Device is offline. Waiting for it to reconnect…'
                 : isAgentMissing
                   ? 'Install or restart the Bridge agent on this device to begin chatting.'
-                : 'Send a message to start the conversation.'}
+                : activeTool === 'bridge'
+                  ? 'Ask Bridge Helper for safe remote checks like status, pwd, ls, read file <path>, tail <path>, or processes.'
+                  : 'Send a message to start the conversation.'}
             </p>
           </div>
         )}

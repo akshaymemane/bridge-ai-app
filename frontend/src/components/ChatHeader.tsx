@@ -2,6 +2,7 @@ import { Badge, StatusDot } from './ui/Badge'
 import { useApp } from '../context/AppContext'
 import type { WsStatus } from '../types'
 import { Wifi, WifiOff, Loader2 } from 'lucide-react'
+import { formatToolName } from '../lib/utils'
 
 function WsStatusBadge({ status }: { status: WsStatus }) {
   if (status === 'connected') {
@@ -29,9 +30,18 @@ function WsStatusBadge({ status }: { status: WsStatus }) {
 }
 
 export function ChatHeader() {
-  const { devices, selectedDeviceId, wsStatus } = useApp()
+  const { devices, selectedDeviceId, activeTool, selectTool, wsStatus } = useApp()
 
   const device = devices.find((d) => d.device_id === selectedDeviceId)
+  const availableTools = [...(device?.tools ?? [])].sort((a, b) => {
+    const priorities = ['codex', 'claude', 'bridge', 'openclaw', 'ollama']
+    const aIndex = priorities.indexOf(a)
+    const bIndex = priorities.indexOf(b)
+    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b)
+    if (aIndex === -1) return 1
+    if (bIndex === -1) return -1
+    return aIndex - bIndex
+  })
 
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b border-surface-5 bg-surface-2 h-14 shrink-0">
@@ -45,12 +55,16 @@ export function ChatHeader() {
               <div className="text-sm font-semibold text-gray-200 leading-tight">
                 {device.name}
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <StatusDot status={device.status} />
                 <span className="text-[10px] text-gray-500 capitalize">{device.status.replace('_', ' ')}</span>
                 {device.tools?.map((tool) => (
-                  <Badge key={tool} variant="offline" className="border-surface-4 bg-surface-4/70 text-[9px] text-gray-300">
-                    {tool}
+                  <Badge
+                    key={tool}
+                    variant={tool === activeTool ? 'online' : 'offline'}
+                    className={tool === activeTool ? 'text-[9px]' : 'border-surface-4 bg-surface-4/70 text-[9px] text-gray-300'}
+                  >
+                    {formatToolName(tool)}
                   </Badge>
                 ))}
               </div>
@@ -61,7 +75,25 @@ export function ChatHeader() {
         )}
       </div>
 
-      <WsStatusBadge status={wsStatus} />
+      <div className="flex items-center gap-3">
+        {device && availableTools.length > 0 && (
+          <label className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+            Tool
+            <select
+              value={activeTool ?? ''}
+              onChange={(event) => selectTool(event.target.value)}
+              className="rounded-lg border border-surface-5 bg-surface-3 px-2 py-1 text-[11px] font-medium normal-case tracking-normal text-gray-200 outline-none transition focus:border-accent/60"
+            >
+              {availableTools.map((tool) => (
+                <option key={tool} value={tool}>
+                  {formatToolName(tool)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <WsStatusBadge status={wsStatus} />
+      </div>
     </header>
   )
 }

@@ -1,11 +1,11 @@
 import { useState, useRef, type KeyboardEvent } from 'react'
 import { Button } from './ui/Button'
 import { useApp } from '../context/AppContext'
-import { cn } from '../lib/utils'
+import { cn, formatToolName } from '../lib/utils'
 import { SendHorizonal, Loader2 } from 'lucide-react'
 
 export function MessageInput() {
-  const { selectedDeviceId, devices, sendMessage, wsStatus, isStreaming } = useApp()
+  const { selectedDeviceId, devices, activeTool, sendMessage, wsStatus, isStreaming } = useApp()
   const [text, setText] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -13,8 +13,9 @@ export function MessageInput() {
   const isUnavailable = selectedDevice?.status !== 'connected'
   const isDisconnected = wsStatus === 'disconnected' || wsStatus === 'error'
   const noDevice = !selectedDeviceId
+  const noTool = !activeTool
 
-  const isDisabled = noDevice || isUnavailable || isDisconnected || isStreaming
+  const isDisabled = noDevice || noTool || isUnavailable || isDisconnected || isStreaming
 
   const placeholder = (() => {
     if (noDevice) return 'Select a device to start chatting…'
@@ -23,7 +24,8 @@ export function MessageInput() {
     if (selectedDevice?.status === 'connecting') return 'Device is still connecting…'
     if (isDisconnected) return 'Reconnecting to gateway…'
     if (isStreaming) return 'AI is responding…'
-    return `Message ${selectedDevice?.name ?? 'device'}…`
+    if (!activeTool) return 'Choose a tool before sending…'
+    return `Message ${selectedDevice?.name ?? 'device'} with ${formatToolName(activeTool)}…`
   })()
 
   function handleSend() {
@@ -97,6 +99,11 @@ export function MessageInput() {
       </div>
 
       <p className="text-[10px] text-gray-600 mt-1.5 px-1">
+        {selectedDevice && activeTool && (
+          <>
+            <span className="mr-2 text-gray-500">Using {formatToolName(activeTool)}</span>
+          </>
+        )}
         <kbd className="text-[9px] bg-surface-4 border border-surface-5 rounded px-1 py-0.5">Enter</kbd>
         {' '}to send,{' '}
         <kbd className="text-[9px] bg-surface-4 border border-surface-5 rounded px-1 py-0.5">Shift+Enter</kbd>

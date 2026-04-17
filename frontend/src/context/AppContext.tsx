@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import type { Device, DeviceChat, WsStatus, SendMessagePayload, AuthSessionResponse, SessionUser, DevicesResponse } from '../types'
 import { useChatState } from '../hooks/useChatState'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { generateChatId, toWsUrl } from '../lib/utils'
+import { generateChatId, preferredTool, toWsUrl } from '../lib/utils'
 
 const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string | undefined) ??
   `${window.location.protocol}//${window.location.host}`
@@ -19,6 +19,8 @@ interface AppContextValue {
   logout: () => Promise<void>
   selectedDeviceId: string | null
   selectDevice: (id: string) => void
+  activeTool: string | null
+  selectTool: (tool: string) => void
   activeChat: DeviceChat | null
   sendMessage: (text: string) => void
   wsStatus: WsStatus
@@ -36,6 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
   const [sessionInfo, setSessionInfo] = useState<AuthSessionResponse | null>(null)
+  const [activeToolByDevice, setActiveToolByDevice] = useState<Record<string, string>>({})
   const chatIdRef = useRef<Record<string, string>>({})
 
   const isAuthenticated = Boolean(sessionInfo?.authenticated)
@@ -74,6 +77,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDevicesLoading(false)
       setDevicesError(null)
       setSelectedDeviceId(null)
+      setActiveToolByDevice({})
       return
     }
 
@@ -126,6 +130,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedDeviceId, state.devices])
 
+  useEffect(() => {
+    if (state.devices.length === 0) {
+      setActiveToolByDevice({})
+      return
+    }
+
+    setActiveToolByDevice((current) => {
+      const next: Record<string, string> = {}
+      let changed = false
+
+      for (const device of state.devices) {
+        const existing = current[device.device_id]
+        const defaultTool = preferredTool(device.tools)
+
+        if (existing && device.tools?.includes(existing)) {
+          next[device.device_id] = existing
+          continue
+        }
+
+        next[device.device_id] = defaultTool
+        if (current[device.device_id] !== defaultTool) {
+          changed = true
+        }
+      }
+
+      if (!changed && Object.keys(current).length === Object.keys(next).length) {
+        return current
+      }
+
+      return next
+    })
+  }, [state.devices])
+
   const login = useCallback(async (tailnet: string) => {
     const res = await fetch(`${GATEWAY_URL}/api/session`, {
       method: 'POST',
@@ -162,6 +199,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const selectTool = useCallback((tool: string) => {
+    if (!selectedDeviceId) return
+    setActiveToolByDevice((current) => ({
+      ...current,
+      [selectedDeviceId]: tool,
+    }))
+  }, [selectedDeviceId])
+
   const sendMessage = useCallback(
     (text: string) => {
       if (!selectedDeviceId || !isAuthenticated) return
@@ -172,16 +217,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       sendUserMessage(selectedDeviceId, chat_id, text)
 
+      const activeTool = activeToolByDevice[selectedDeviceId] ?? ''
       const payload: SendMessagePayload = {
         type: 'send_message',
         chat_id,
         device_id: selectedDeviceId,
-        tool: '',
+        tool: activeTool,
         text,
       }
       send(JSON.stringify(payload))
     },
-    [isAuthenticated, selectedDeviceId, sendUserMessage, send]
+    [activeToolByDevice, isAuthenticated, selectedDeviceId, sendUserMessage, send]
   )
 
   useEffect(() => {
@@ -193,6 +239,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.chats])
 
   const activeChat = selectedDeviceId ? (state.chats[selectedDeviceId] ?? null) : null
+  const activeTool = selectedDeviceId ? (activeToolByDevice[selectedDeviceId] ?? null) : null
   const isStreaming = Boolean(activeChat?.messages.some((message) => message.streaming))
 
   const value: AppContextValue = {
@@ -207,6 +254,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     logout,
     selectedDeviceId,
     selectDevice,
+    activeTool,
+    selectTool,
     activeChat,
     sendMessage,
     wsStatus,
